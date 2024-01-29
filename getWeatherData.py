@@ -28,7 +28,7 @@ def getWeather(apiKey, city):
 ################# Main Function ####################
 if __name__ == "__main__":
     
-    api_key = '45263cd86f74a5ca24f3d8cf1290a62a' #API key from OpenWeatherMap.com
+    api_key = 'YOUR API KEY' #API key from OpenWeatherMap.com
     city = 'Los Angeles' #Update this with the city!!!
     weather = getWeather(api_key, city)
 
