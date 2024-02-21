@@ -7,8 +7,8 @@ def getWeather(apiKey, city):
     url = "http://api.openweathermap.org/data/2.5/weather"
     params = {
         'q': city,
-        'appid': api_key,
-        'units': 'imperial'  # You can change units to metric if you prefer C
+        'appid': apiKey,  # Replace 'YOUR API KEY' with your actual API key
+        'units': 'imperial'  # You can change units to metric if you prefer Celsius
     }
 
     #if no errors, return the data
@@ -23,16 +23,14 @@ def getWeather(apiKey, city):
     
     except Exception as e:
         print(f"Error: {e}") #fancy way to print error messages
-        return None
-
-def defineWeather()
+        return None, None
 
 ################# Main Function ####################
 if __name__ == "__main__":
     
     api_key = 'YOUR API KEY' #API key from OpenWeatherMap.com
     city = 'Los Angeles' #Update this with the city!!!
-    weather = getWeather(api_key, city)
+    weather, temperature = getWeather(api_key, city)
 
     if weather is not None and temperature is not None:
         if weather.lower() == 'rain':
@@ -50,4 +48,3 @@ if __name__ == "__main__":
         print("Failed to fetch weather data.")
 
 
-#
