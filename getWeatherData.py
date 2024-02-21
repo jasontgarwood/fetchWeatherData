@@ -30,6 +30,18 @@ def getWeather(apiKey, city):
         print(f"Error: {e}") #fancy way to print error messages
         return None, None
 
+# Function to map temperature to extension length
+def map_temperature_to_extension(temperature):
+    # Assuming temperature ranges from -20 to 120 degrees Fahrenheit
+    # and extension ranges from 1000 to 2000 (adjust as needed)
+    return ((temperature + 20) / 140) * (2000 - 1000) + 1000
+
+# Function to extend linear actuators based on temperature
+def extend_linear_actuators(temperature):
+    extension_length = map_temperature_to_extension(temperature)
+    pi.set_servo_pulsewidth(17, extension_length)  # GPIO pin 17, set extension length
+    pi.set_servo_pulsewidth(18, extension_length)  # GPIO pin 18, set extension length
+
 ################# Main Function ####################
 if __name__ == "__main__":
     
@@ -41,19 +53,8 @@ if __name__ == "__main__":
         if weather.lower() == 'rain':
             print("It is raining.")
             ##SQUIRT WATER
-        elif temperature < 32:  # Below freezing
-            print("It is cold.")
-            # Extend servo
-            pi.set_servo_pulsewidth(17, 2000)  # GPIO pin 17, 2000 us pulse width for clockwise rotation
-            pi.set_servo_pulsewidth(18, 2000)  # GPIO pin 18, 2000 us pulse width for clockwise rotation
-            time.sleep(0.5)
-        elif temperature > 80:  # Above 80 degrees
-            print("It is warm.")
-            # Shrink servo
-            pi.set_servo_pulsewidth(17, 1000)  # GPIO pin 17, 1000 us pulse width for counter-clockwise rotation
-            pi.set_servo_pulsewidth(18, 1000)  # GPIO pin 18, 1000 us pulse width for counter-clockwise rotation
-            time.sleep(0.5)
         else:
+            extend_linear_actuators(temperature)
             print(f"The weather is {weather} and the temperature is {temperature} degrees.")
     else:
         print("Failed to fetch weather data.")
