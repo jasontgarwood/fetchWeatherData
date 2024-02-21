@@ -1,5 +1,10 @@
 #import necessary libs
 import requests
+import time
+import pigpio
+
+# Initialize pigpio
+pi = pigpio.pi()
 
 ################# Helper Functions ####################
 #return weather data based on weather API
@@ -7,7 +12,7 @@ def getWeather(apiKey, city):
     url = "http://api.openweathermap.org/data/2.5/weather"
     params = {
         'q': city,
-        'appid': apiKey,  # Replace 'YOUR API KEY' with your actual API key
+        'appid': apiKey,
         'units': 'imperial'  # You can change units to metric if you prefer Celsius
     }
 
@@ -38,13 +43,20 @@ if __name__ == "__main__":
             ##SQUIRT WATER
         elif temperature < 32:  # Below freezing
             print("It is cold.")
-            ##EXTEND SERVO
+            # Extend servo
+            pi.set_servo_pulsewidth(17, 2000)  # GPIO pin 17, 2000 us pulse width for clockwise rotation
+            pi.set_servo_pulsewidth(18, 2000)  # GPIO pin 18, 2000 us pulse width for clockwise rotation
+            time.sleep(0.5)
         elif temperature > 80:  # Above 80 degrees
             print("It is warm.")
-            ##SHRINK SERVO
+            # Shrink servo
+            pi.set_servo_pulsewidth(17, 1000)  # GPIO pin 17, 1000 us pulse width for counter-clockwise rotation
+            pi.set_servo_pulsewidth(18, 1000)  # GPIO pin 18, 1000 us pulse width for counter-clockwise rotation
+            time.sleep(0.5)
         else:
             print(f"The weather is {weather} and the temperature is {temperature} degrees.")
     else:
         print("Failed to fetch weather data.")
 
-
+# Cleanup pigpio
+pi.stop()
