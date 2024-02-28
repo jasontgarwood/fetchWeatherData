@@ -4,21 +4,40 @@ import RPi.GPIO as GPIO
 import time
 
 ################# Init Servos ####################
-servo1_pin = 17  # 
-servo2_pin = 18  # 
+servo1_pin = 17  
+servo2_pin = 18  
 
-# Set up the GPIO pins as output
+# Set up GPIO mode and pins
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(servo1_pin, GPIO.OUT)
 GPIO.setup(servo2_pin, GPIO.OUT)
 
-# Create PWM objects for the servos and start them
-servo1 = GPIO.PWM(servo1_pin, 50)  # 50 Hz frequency
-servo2 = GPIO.PWM(servo2_pin, 50)  # 50 Hz frequency
-servo1.start(0)
-servo2.start(0)
+# Create PWM instances for servos
+servo1_pwm = GPIO.PWM(servo1_pin, 50)  # 50 Hz PWM frequency
+servo2_pwm = GPIO.PWM(servo2_pin, 50)
 
+# Start PWM
+servo1_pwm.start(0)
+servo2_pwm.start(0)
 
 ################# Helper Functions ####################
+def rotate_servos():
+    # Rotate servo 1 
+    servo1_pwm.ChangeDutyCycle(7.5)  
+
+    # Rotate servo 2
+    servo2_pwm.ChangeDutyCycle(0) 
+    servo2_pwm.ChangeDutyCycle(3)  
+
+def return_to_nuetral():
+   
+    # Rotate Servo 1
+    servo1_pwm.ChangeDutyCycle(0)  
+    servo1_pwm.ChangeDutyCycle(3) 
+
+    # Rotate servo 2
+    servo2_pwm.ChangeDutyCycle(7.5)  
+
 #return weather data based on weather API
 def getWeather(apiKey, city):
     url = "http://api.openweathermap.org/data/2.5/weather"
@@ -52,18 +71,10 @@ if __name__ == "__main__":
     if temperature is not None:
         if temperature < 50:  # Below 60 degrees
             print("It is cold.")
-            ##Shrink SERVOa
+            return_to_nuetral() 
         elif temperature >= 50:  # Above 80 degrees
             print("It is warm.")
-            # Rotate servo 1 half turn counterclockwise
-            servo1.ChangeDutyCycle(2.5)  
-            time.sleep(1)  # Adjust sleep time according to servo speed
-            servo1.ChangeDutyCycle(0)  
-            
-            # Rotate servo 2 half turn clockwise
-            servo2.ChangeDutyCycle(7.5) 
-            time.sleep(1)  # Adjust sleep time according to servo speed
-            servo2.ChangeDutyCycle(0)  
+            rotate_servos()  
         else:
             print(f"The weather is {weather} and the temperature is {temperature} degrees.")
     else:

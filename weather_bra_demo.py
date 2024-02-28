@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
-import keyboard  # Keyboard module for capturing key presses
 
+################# init Servos ####################
 # GPIO pins for the servos
 servo1_pin = 18
 servo2_pin = 17
@@ -11,38 +11,91 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(servo1_pin, GPIO.OUT)
 GPIO.setup(servo2_pin, GPIO.OUT)
 
-# Create PWM instances for the servos
-servo1_pwm = GPIO.PWM(servo1_pin, 50)  # 50 Hz frequency
+# Create PWM instances for servos
+servo1_pwm = GPIO.PWM(servo1_pin, 50)  # 50 Hz PWM frequency
 servo2_pwm = GPIO.PWM(servo2_pin, 50)
 
-# Function to move servo to a specific angle
-def move_servo(pwm, angle, slow=False):
-    duty_cycle = (angle / 18) + 2
-    pwm.start(duty_cycle)
-    if slow:
-        time.sleep(0.5)  # Adjust this value for slower movement
-    else:
-        time.sleep(0.1)  # Default movement speed
-    pwm.stop()
+# Start PWM
+servo1_pwm.start(0)
+servo2_pwm.start(0)
 
-# Main function to control the servos
+################# Helper Functions ####################
+
+
+# Function to move servo to a specific angle
+def move_servo(current_state_index):
+    if current_state_index == 1:
+    # Rotate servo 1 
+        servo1_pwm.ChangeDutyCycle(11.5)  
+
+        # Rotate servo 2
+        servo2_pwm.ChangeDutyCycle(0) 
+        servo2_pwm.ChangeDutyCycle(3)  
+
+    else:
+        # Rotate Servo 1
+        servo1_pwm.ChangeDutyCycle(0)  
+        servo1_pwm.ChangeDutyCycle(3) 
+
+        # Rotate servo 2
+        servo2_pwm.ChangeDutyCycle(11.5)  
+
+        # Function to move servo to a specific angle
+
+def move_servo_slow(current_state_index):
+    if current_state_index == 1:
+        # Rotate servo 1 
+        
+        slow_rotate(servo1_pwm, 11.5, 2)  
+
+        # Rotate servo 2
+        
+        slow_rotate(servo2_pwm, 3, 2)  
+
+    else:
+        # Rotate Servo 1
+        print("rotating to 3")
+        servo1_pwm.ChangeDutyCycle(0)
+        slow_rotate(servo1_pwm, 3, 3)
+        
+
+        # Rotate servo 2
+        
+        slow_rotate(servo2_pwm, 11.5, 2)
+
+
+def slow_rotate(servo_pwm, target_duty_cycle, duration):
+    current_duty_cycle = servo_pwm._last_cycle if hasattr(servo_pwm, '_last_cycle') else 0  
+    steps = int(duration * 50)  # Calculate the number of steps based on duration
+    duty_step = (target_duty_cycle - current_duty_cycle) / steps  # Calculate step size
+    
+    for _ in range(steps):
+        current_duty_cycle += duty_step  
+        servo_pwm.ChangeDutyCycle(current_duty_cycle)
+        time.sleep(duration / steps)  
+    servo_pwm.ChangeDutyCycle(target_duty_cycle)  
+       
+
+################# Main Functions ####################
 def main():
-    servo_states = [0, 160]  # Neutral and Active states for the servos
+    
     current_state_index = 0  # Index to keep track of current state
 
     try:
         while True:
-            if keyboard.is_pressed('f'):
-                current_state_index = (current_state_index + 1) % len(servo_states)
-                move_servo(servo1_pwm, servo_states[current_state_index])
-                move_servo(servo2_pwm, servo_states[current_state_index])
-                print("Servos toggled to state:", current_state_index)
+            command = input("Press 'f' for normal movement or 's' for slow movement: ").strip().lower()
+            if command == 'f':
+                current_state_index = (current_state_index + 1) % 2
+                move_servo(current_state_index)
+                print("Servos toggled to state with fast movement:")
+            elif command == 's':
+                current_state_index = (current_state_index + 1) % 2
+                move_servo_slow(current_state_index)
+                print("Servos toggled to state with slow movement:")
+            else:
+                print("Invalid command. Please press 'f' or 's'.")
 
-            elif keyboard.is_pressed('s'):
-                current_state_index = (current_state_index + 1) % len(servo_states)
-                move_servo(servo1_pwm, servo_states[current_state_index], slow=True)
-                move_servo(servo2_pwm, servo_states[current_state_index], slow=True)
-                print("Servos toggled to state with slow movement:", current_state_index)
+            
 
     except KeyboardInterrupt:
         pass
